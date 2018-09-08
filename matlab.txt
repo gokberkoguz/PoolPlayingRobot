@@ -1,0 +1,111 @@
+%55piksel 1cm according to the set up 
+%Starting frame x,500
+rgb = imread('bilarr98.jpg');
+
+figure, imshow(rgb)
+hold on
+imtool(rgb)
+red=rgb(:,:,1);
+green=rgb(:,:,2);
+blue=rgb(:,:,3);
+
+[centersballs, radiiballs] = imfindcircles(red,[140 170],'ObjectPolarity','bright', ...
+    'Sensitivity',0.945);
+
+c = viscircles(centersballs,radiiballs);
+
+[centers, radii ,metric] = imfindcircles(green,[250 310],'ObjectPolarity','dark', ...
+    'Sensitivity',0.986);
+h = viscircles(centers,radii);
+
+radiiballW=radiiballs(1,:);
+C=centersballs;
+CenterY=C(2,:);
+CenterW=C(1,:);
+C=CenterY-CenterW;
+D=C(:,1);
+F=C(:,2);
+distancebtwballs=(D^2+F^2)^(1/2);
+Xhole=centers(:,1);
+Yhole=centers(:,2);
+YellowX=CenterY(:,1);
+YellowY=CenterY(:,2);
+K=CenterW(:,1);
+L=CenterW(:,2);
+distancehole1=((Xhole-YellowX)^2+(YellowY-Yhole)^2)^(1/2);
+distancehole2=((Xhole-K)^2+(L-Yhole)^2)^(1/2);
+
+%switching yellow and white in case of anything goes wrong
+if distancehole2<distancehole1
+    temp=K;
+    K=YellowX;
+    YellowX=temp;
+    temp=YellowY;
+    YellowY=L;
+    L=temp;
+end   
+    
+ 
+    
+   
+%AcibtwYellowandHole
+
+aci=abs(YellowY-Yhole)/distancehole1;
+X=acosd(aci);
+
+%Hit point
+Rx=((radiiballs(2,:)*4)/2)*cosd(X);
+Ry=((radiiballs(2,:)*4)/2)*sind(X);
+HitX=YellowX+(Ry);
+HitY=YellowY-(Rx);
+
+%Distance W to hit point
+distancebtwWandHit=((CenterW(:,1)-HitX)^2+(CenterW(:,2)-HitY)^2)^(1/2);
+d3=distancebtwWandHit;
+
+%distance W to Hole
+
+distancebtwWandHole=(((CenterW(:,1)-Xhole)^2)+ (CenterW(:,2)-Yhole)^2)^(1/2);
+d4=distancebtwWandHole;
+%distanceHittoHole
+distancebtwHitandHole=((HitX-Xhole)^2+(HitY-Yhole)^2)^(1/2);
+d1=distancebtwHitandHole;
+
+%angletohit
+
+HitAngle=asind((L-HitY)/((K-HitX)^2+(L-HitY)^2)^(1/2));
+
+
+%# define points (in matrix coordinates)
+p1 = [Yhole,Xhole];
+p2 = [YellowY,YellowX];
+
+plot([p1(2),p2(2)],[p1(1),p2(1)],'Color','b','LineWidth',2)
+
+p1 = [L,K];
+p2 = [HitY,HitX];
+
+%# plot the point lines.
+
+plot([p1(2),p2(2)],[p1(1),p2(1)],'Color','r','LineWidth',2)
+
+hitPoint=K+640*cosd(HitAngle);
+CagatayPointY=L+640*sind(HitAngle);
+
+p1 = [L,K];
+p2 = [CagatayPointY,hitPoint];
+
+%# plot the points.
+
+plot([p1(2),p2(2)],[p1(1),p2(1)],'Color','b','LineWidth',2)
+
+Spec= imfinfo('bilarr98.jpg');
+PixelLenghtX=Spec.Width-hitPoint;
+PixelLenghtY=CagatayPointY;
+CmY=PixelLenghtX/55;
+CmX=PixelLenghtY/55;
+
+
+viscircles([HitX HitY],160) ;
+
+
